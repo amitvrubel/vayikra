@@ -8,3 +8,13 @@ ktor:
       - com.vayikra.plugins.StatusPagesKt.configureStatusPages
       - com.vayikra.plugins.RoutingKt.configureRouting
       - com.vayikra.db.PostgresKt.configureDatabase
+
+db:
+  url: ${DB_URL}
+  user: ${DB_USER}
+  password: ${DB_PASSWORD}
+
+jwt:
+  secret: ${JWT_SECRET}
+  issuer: ${JWT_ISSUER}
+  audience: ${JWT_AUDIENCE}

@@ -5,9 +5,9 @@ import com.auth0.jwt.algorithms.Algorithm
 import java.util.Date
 
 class JwtService(
-    private val secret: String = "tmp-vayikra-secret-that-will-not-reach-production",
-    private val issuer: String = "vayikra",
-    private val audience: String = "vayikra-users",
+    private val secret: String,
+    private val issuer: String,
+    private val audience: String
 ) {
     private val algorithm = Algorithm.HMAC256(secret)
 

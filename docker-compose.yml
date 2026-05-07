@@ -2,12 +2,14 @@ services:
   db:
     image: postgres:16-alpine
     container_name: vayikra-db
+    env_file:
+      - app/.env
     environment:
-      POSTGRES_DB: vayikra
-      POSTGRES_USER: vayikra
-      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - vayikra_data:/var/lib/postgresql/data
 

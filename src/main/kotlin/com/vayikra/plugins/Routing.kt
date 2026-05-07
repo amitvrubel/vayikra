@@ -9,7 +9,11 @@ import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
     val userService = UserService()
-    val jwtService = JwtService()
+    val jwtService = JwtService(
+        secret = environment.config.property("jwt.secret").getString(),
+        issuer = environment.config.property("jwt.issuer").getString(),
+        audience = environment.config.property("jwt.audience").getString()
+    )
     routing {
         get("/") {
             call.respondText("Vayikra API is running")

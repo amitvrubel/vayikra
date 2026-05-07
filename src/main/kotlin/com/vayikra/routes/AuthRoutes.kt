@@ -1,0 +1,37 @@
+package com.vayikra.com.vayikra.routes
+
+import UserService
+import com.vayikra.com.vayikra.services.JwtService
+import com.vayikra.models.AuthResponse
+import com.vayikra.models.RegisterRequest
+
+import io.ktor.http.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+
+fun Route.authRoutes(userService: UserService, jwtService: JwtService) {
+    route("/auth") {
+        post("/register") {
+            val req = call.receive<RegisterRequest>()
+            if (userService.findByEmail(req.email) != null) {
+                return@post call.respond(HttpStatusCode.Conflict, mapOf("error" to "Email already in use"))
+            }
+            val user = userService.createUser(
+                email = req.email,
+                name = req.name,
+                password = req.password,
+                city = req.city,
+                country = req.country,
+            )
+
+            call.respond(
+                HttpStatusCode.Created,
+               AuthResponse(
+                    accessToken = jwtService.generateAccessToken(user.id),
+                    refreshToken = jwtService.generateRefreshToken(user.id),
+                    user = user
+                ))
+        }
+    }
+}

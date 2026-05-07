@@ -1,0 +1,10 @@
+ktor:
+  deployment:
+    port: 8080
+  application:
+    modules:
+      - com.vayikra.plugins.SerializationKt.configureSerialization
+      - com.vayikra.plugins.SecurityKt.configureSecurity
+      - com.vayikra.plugins.StatusPagesKt.configureStatusPages
+      - com.vayikra.plugins.RoutingKt.configureRouting
+      - com.vayikra.db.PostgresKt.configureDatabase

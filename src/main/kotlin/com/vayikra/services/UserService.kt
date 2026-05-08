@@ -1,3 +1,5 @@
+package com.vayikra.services
+
 import com.vayikra.db.Users
 import com.vayikra.models.User
 import org.jetbrains.exposed.v1.core.eq
@@ -18,16 +20,25 @@ class UserService {
                     email = row[Users.email],
                     name = row[Users.name],
                     city = row[Users.city],
-                    country = row[Users.country]
+                    country = row[Users.country],
+                    passwordHash = row[Users.passwordHash]
                 )
             }
             .singleOrNull()
     }
 
-    fun findPasswordHash(email: String): String? = transaction {
+    fun findById(id: String): User? = transaction {
         Users.selectAll()
-            .where { Users.email eq email }
-            .map { it[Users.passwordHash] }
+            .where { Users.id eq id }
+            .map { row ->
+                User(
+                    id = row[Users.id],
+                    email = row[Users.email],
+                    name = row[Users.name],
+                    city = row[Users.city],
+                    country = row[Users.country]
+                )
+            }
             .singleOrNull()
     }
 

@@ -1,14 +1,19 @@
-package com.vayikra.com.vayikra.routes
+package com.vayikra.routes
 
-import UserService
 import com.vayikra.com.vayikra.services.JwtService
 import com.vayikra.models.AuthResponse
+import com.vayikra.models.LoginRequest
 import com.vayikra.models.RegisterRequest
+import com.vayikra.services.UserService
 
 import io.ktor.http.*
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import org.mindrot.jbcrypt.BCrypt
 
 fun Route.authRoutes(userService: UserService, jwtService: JwtService) {
     route("/auth") {
@@ -30,8 +35,33 @@ fun Route.authRoutes(userService: UserService, jwtService: JwtService) {
                AuthResponse(
                     accessToken = jwtService.generateAccessToken(user.id),
                     refreshToken = jwtService.generateRefreshToken(user.id),
-                    user = user
+                   user = user
                 ))
+        }
+
+        post("/login") {
+            val req = call.receive<LoginRequest>()
+            val user = userService.findByEmail(req.email) ?: return@post call.respond(HttpStatusCode.Unauthorized)
+
+            if (!BCrypt.checkpw(req.password, user.passwordHash)) {
+                return@post call.respond(HttpStatusCode.Unauthorized)
+            }
+
+            call.respond(AuthResponse(
+                accessToken = jwtService.generateAccessToken(user.id),
+                refreshToken = jwtService.generateRefreshToken(user.id),
+                user = user
+            ))
+
+        }
+    }
+
+    authenticate("auth-jwt") {
+        get("/me") {
+            val principal = call.principal<JWTPrincipal>()!!
+            val userId = principal.payload.getClaim("userId").asString()
+            val user = userService.findById(userId) ?: return@get call.respond(HttpStatusCode.NotFound)
+            call.respond(user)
         }
     }
 }

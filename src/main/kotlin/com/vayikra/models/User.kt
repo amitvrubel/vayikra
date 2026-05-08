@@ -1,6 +1,7 @@
 package com.vayikra.models
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.util.*
 
 @Serializable
@@ -9,7 +10,8 @@ data class User(
     val email: String,
     val name: String,
     val city: String,
-    val country: String
+    val country: String,
+    @Transient internal val passwordHash: String? = null
 )
 
 @Serializable

@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
     alias(libs.plugins.kotlin.serialization)
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
 }
 
 group = "com.vayikra"
@@ -42,11 +43,24 @@ dependencies {
 tasks.named<JavaExec>("run") {
     val envFile = file(".env")
     if (envFile.exists()) {
-        envFile.readLines()
+        envFile
+            .readLines()
             .filter { it.isNotBlank() && !it.startsWith("#") }
             .forEach { line ->
                 val (key, value) = line.split("=", limit = 2)
                 environment(key.trim(), value.trim())
             }
     }
+}
+
+ktlint {
+    version.set("1.5.0")
+    android.set(false)
+    outputToConsole.set(true)
+    filter {
+        exclude("**/generated/**")
+    }
+    additionalEditorconfig.set(
+        mapOf("ij_kotlin_imports_layout" to "*"),
+    )
 }

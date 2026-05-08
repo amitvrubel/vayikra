@@ -5,38 +5,45 @@ import com.vayikra.models.AuthResponse
 import com.vayikra.models.LoginRequest
 import com.vayikra.models.RegisterRequest
 import com.vayikra.services.UserService
-
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.route
 import org.mindrot.jbcrypt.BCrypt
 
-fun Route.authRoutes(userService: UserService, jwtService: JwtService) {
+fun Route.authRoutes(
+    userService: UserService,
+    jwtService: JwtService,
+) {
     route("/auth") {
         post("/register") {
             val req = call.receive<RegisterRequest>()
             if (userService.findByEmail(req.email) != null) {
                 return@post call.respond(HttpStatusCode.Conflict, mapOf("error" to "Email already in use"))
             }
-            val user = userService.createUser(
-                email = req.email,
-                name = req.name,
-                password = req.password,
-                city = req.city,
-                country = req.country,
-            )
+            val user =
+                userService.createUser(
+                    email = req.email,
+                    name = req.name,
+                    password = req.password,
+                    city = req.city,
+                    country = req.country,
+                )
 
             call.respond(
                 HttpStatusCode.Created,
-               AuthResponse(
+                AuthResponse(
                     accessToken = jwtService.generateAccessToken(user.id),
                     refreshToken = jwtService.generateRefreshToken(user.id),
-                   user = user
-                ))
+                    user = user,
+                ),
+            )
         }
 
         post("/login") {
@@ -47,12 +54,13 @@ fun Route.authRoutes(userService: UserService, jwtService: JwtService) {
                 return@post call.respond(HttpStatusCode.Unauthorized)
             }
 
-            call.respond(AuthResponse(
-                accessToken = jwtService.generateAccessToken(user.id),
-                refreshToken = jwtService.generateRefreshToken(user.id),
-                user = user
-            ))
-
+            call.respond(
+                AuthResponse(
+                    accessToken = jwtService.generateAccessToken(user.id),
+                    refreshToken = jwtService.generateRefreshToken(user.id),
+                    user = user,
+                ),
+            )
         }
     }
 

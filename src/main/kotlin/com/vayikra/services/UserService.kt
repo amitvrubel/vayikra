@@ -2,47 +2,55 @@ package com.vayikra.services
 
 import com.vayikra.db.Users
 import com.vayikra.models.User
+import java.util.UUID
+import kotlin.time.Clock
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.mindrot.jbcrypt.BCrypt
-import java.util.UUID
-import kotlin.time.Clock
 
 class UserService {
-    fun findByEmail(email: String): User?  = transaction {
-        Users.selectAll()
-            .where { Users.email eq email }
-            .map { row ->
-                User(
-                    id = row[Users.id],
-                    email = row[Users.email],
-                    name = row[Users.name],
-                    city = row[Users.city],
-                    country = row[Users.country],
-                    passwordHash = row[Users.passwordHash]
-                )
-            }
-            .singleOrNull()
-    }
+    fun findByEmail(email: String): User? =
+        transaction {
+            Users
+                .selectAll()
+                .where { Users.email eq email }
+                .map { row ->
+                    User(
+                        id = row[Users.id],
+                        email = row[Users.email],
+                        name = row[Users.name],
+                        city = row[Users.city],
+                        country = row[Users.country],
+                        passwordHash = row[Users.passwordHash],
+                    )
+                }.singleOrNull()
+        }
 
-    fun findById(id: String): User? = transaction {
-        Users.selectAll()
-            .where { Users.id eq id }
-            .map { row ->
-                User(
-                    id = row[Users.id],
-                    email = row[Users.email],
-                    name = row[Users.name],
-                    city = row[Users.city],
-                    country = row[Users.country]
-                )
-            }
-            .singleOrNull()
-    }
+    fun findById(id: String): User? =
+        transaction {
+            Users
+                .selectAll()
+                .where { Users.id eq id }
+                .map { row ->
+                    User(
+                        id = row[Users.id],
+                        email = row[Users.email],
+                        name = row[Users.name],
+                        city = row[Users.city],
+                        country = row[Users.country],
+                    )
+                }.singleOrNull()
+        }
 
-    fun createUser(email: String, password: String, name: String, city: String, country: String): User {
+    fun createUser(
+        email: String,
+        password: String,
+        name: String,
+        city: String,
+        country: String,
+    ): User {
         val id = UUID.randomUUID().toString()
         val hash = BCrypt.hashpw(password, BCrypt.gensalt())
         val now = Clock.System.now()

@@ -1,4 +1,4 @@
-package com.vayikra.com.vayikra.models
+package com.vayikra.models
 
 import java.util.UUID
 import kotlinx.serialization.Serializable

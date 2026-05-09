@@ -1,8 +1,8 @@
 package com.vayikra.services
 
-import com.vayikra.com.vayikra.models.Book
-import com.vayikra.com.vayikra.models.BookStatus
 import com.vayikra.db.Books
+import com.vayikra.models.Book
+import com.vayikra.models.BookStatus
 import java.util.UUID
 import kotlin.time.Clock
 import org.jetbrains.exposed.v1.core.eq

@@ -5,6 +5,7 @@ import com.vayikra.models.Book
 import com.vayikra.models.BookStatus
 import java.util.UUID
 import kotlin.time.Clock
+import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -16,18 +17,7 @@ class BookService {
             Books
                 .selectAll()
                 .where { Books.ownerId eq ownerId }
-                .map { row ->
-                    Book(
-                        id = row[Books.id],
-                        title = row[Books.title],
-                        author = row[Books.author],
-                        ownerId = row[Books.ownerId],
-                        isbn = row[Books.isbn],
-                        imageUrl = row[Books.imageUrl],
-                        notes = row[Books.notes],
-                        status = BookStatus.valueOf(row[Books.status]),
-                    )
-                }
+                .map(::rowToBook)
         }
 
     fun getAllAvailable(): List<Book> =
@@ -35,18 +25,7 @@ class BookService {
             Books
                 .selectAll()
                 .where { Books.status eq BookStatus.AVAILABLE.name }
-                .map { row ->
-                    Book(
-                        id = row[Books.id],
-                        ownerId = row[Books.ownerId],
-                        title = row[Books.title],
-                        author = row[Books.author],
-                        isbn = row[Books.isbn],
-                        imageUrl = row[Books.imageUrl],
-                        status = BookStatus.valueOf(row[Books.status]),
-                        notes = row[Books.notes],
-                    )
-                }
+                .map(::rowToBook)
         }
 
     fun createBook(
@@ -82,6 +61,29 @@ class BookService {
             isbn = isbn,
             imageUrl = imageUrl,
             notes = notes,
+            createdAt = now,
         )
     }
+
+    fun getById(id: String): Book? =
+        transaction {
+            Books
+                .selectAll()
+                .where { Books.id eq id }
+                .map(::rowToBook)
+                .singleOrNull()
+        }
+
+    private fun rowToBook(row: ResultRow) =
+        Book(
+            id = row[Books.id],
+            ownerId = row[Books.ownerId],
+            title = row[Books.title],
+            author = row[Books.author],
+            isbn = row[Books.isbn],
+            imageUrl = row[Books.imageUrl],
+            status = BookStatus.valueOf(row[Books.status]),
+            notes = row[Books.notes],
+            createdAt = row[Books.createdAt],
+        )
 }

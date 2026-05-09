@@ -1,6 +1,7 @@
 package com.vayikra.routes
 
 import com.vayikra.models.CreateBookRequest
+import com.vayikra.models.toDto
 import com.vayikra.services.BookService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
@@ -35,14 +36,14 @@ fun Route.bookRoutes(bookService: BookService) {
                         imageUrl = req.imageUrl,
                         notes = req.notes,
                     )
-                call.respond(HttpStatusCode.Created, book)
+                call.respond(HttpStatusCode.Created, book.toDto())
             }
 
             get("/my") {
                 val principal = call.principal<JWTPrincipal>()!!
                 val userId = principal.payload.getClaim("userId").asString()
                 val books = bookService.getBooksForUser(userId)
-                call.respond(books)
+                call.respond(books.map { it.toDto() })
             }
         }
     }

@@ -40,3 +40,16 @@ object BookJourney : Table("book_journey") {
 
     override val primaryKey = PrimaryKey(id)
 }
+
+object BookRequests : Table("book_requests") {
+    val id = varchar("id", 36)
+    val bookId = varchar("book_id", 36).references(Books.id)
+    val requesterId = varchar("requester_id", 36).references(Users.id)
+    val ownerId = varchar("owner_id", 36).references(Users.id)
+    val status = varchar("status", 50)
+    val message = text("message").nullable()
+    val createdAt = timestamp("created_at")
+    val updatedAt = timestamp("updated_at")
+
+    override val primaryKey = PrimaryKey(id)
+}

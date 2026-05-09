@@ -4,6 +4,7 @@ import com.vayikra.com.vayikra.services.JwtService
 import com.vayikra.models.AuthResponse
 import com.vayikra.models.LoginRequest
 import com.vayikra.models.RegisterRequest
+import com.vayikra.models.toDto
 import com.vayikra.services.UserService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
@@ -41,14 +42,16 @@ fun Route.authRoutes(
                 AuthResponse(
                     accessToken = jwtService.generateAccessToken(user.id),
                     refreshToken = jwtService.generateRefreshToken(user.id),
-                    user = user,
+                    user = user.toDto(),
                 ),
             )
         }
 
         post("/login") {
             val req = call.receive<LoginRequest>()
-            val user = userService.findByEmail(req.email) ?: return@post call.respond(HttpStatusCode.Unauthorized)
+            val user =
+                userService.findByEmail(req.email)
+                    ?: return@post call.respond(HttpStatusCode.Unauthorized)
 
             if (!BCrypt.checkpw(req.password, user.passwordHash)) {
                 return@post call.respond(HttpStatusCode.Unauthorized)
@@ -58,7 +61,7 @@ fun Route.authRoutes(
                 AuthResponse(
                     accessToken = jwtService.generateAccessToken(user.id),
                     refreshToken = jwtService.generateRefreshToken(user.id),
-                    user = user,
+                    user = user.toDto(),
                 ),
             )
         }
@@ -68,8 +71,10 @@ fun Route.authRoutes(
         get("/me") {
             val principal = call.principal<JWTPrincipal>()!!
             val userId = principal.payload.getClaim("userId").asString()
-            val user = userService.findById(userId) ?: return@get call.respond(HttpStatusCode.NotFound)
-            call.respond(user)
+            val user =
+                userService.findById(userId)
+                    ?: return@get call.respond(HttpStatusCode.NotFound)
+            call.respond(user.toDto())
         }
     }
 }

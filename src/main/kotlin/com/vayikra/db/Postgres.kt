@@ -20,7 +20,7 @@ fun Application.configureDatabase() {
 
     Database.connect(url = url, driver = driver, user = user, password = password)
     transaction {
-        SchemaUtils.create(Users, Books, BookJourney)
+        SchemaUtils.create(Users, Books, BookJourney, BookRequests)
     }
 
     log.info("Database configured")

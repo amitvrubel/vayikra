@@ -4,6 +4,7 @@ import com.vayikra.db.Users
 import com.vayikra.models.User
 import java.util.UUID
 import kotlin.time.Clock
+import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -16,16 +17,8 @@ class UserService {
             Users
                 .selectAll()
                 .where { Users.email eq email }
-                .map { row ->
-                    User(
-                        id = row[Users.id],
-                        email = row[Users.email],
-                        name = row[Users.name],
-                        city = row[Users.city],
-                        country = row[Users.country],
-                        passwordHash = row[Users.passwordHash],
-                    )
-                }.singleOrNull()
+                .map(::rowToUser)
+                .singleOrNull()
         }
 
     fun findById(id: String): User? =
@@ -33,15 +26,8 @@ class UserService {
             Users
                 .selectAll()
                 .where { Users.id eq id }
-                .map { row ->
-                    User(
-                        id = row[Users.id],
-                        email = row[Users.email],
-                        name = row[Users.name],
-                        city = row[Users.city],
-                        country = row[Users.country],
-                    )
-                }.singleOrNull()
+                .map(::rowToUser)
+                .singleOrNull()
         }
 
     fun createUser(
@@ -67,6 +53,25 @@ class UserService {
             }
         }
 
-        return User(id = id, email = email, name = name, city = city, country = country)
+        return User(
+            id = id,
+            email = email,
+            name = name,
+            city = city,
+            country = country,
+            passwordHash = hash,
+            createdAt = now,
+        )
     }
+
+    private fun rowToUser(row: ResultRow) =
+        User(
+            id = row[Users.id],
+            email = row[Users.email],
+            name = row[Users.name],
+            city = row[Users.city],
+            country = row[Users.country],
+            passwordHash = row[Users.passwordHash],
+            createdAt = row[Users.createdAt],
+        )
 }

@@ -1,7 +1,8 @@
 package com.vayikra.routes
 
-import com.vayikra.com.vayikra.models.CreateBookRequest
+import com.vayikra.models.CreateBookRequest
 import com.vayikra.services.BookService
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
@@ -34,7 +35,7 @@ fun Route.bookRoutes(bookService: BookService) {
                         imageUrl = req.imageUrl,
                         notes = req.notes,
                     )
-                call.respond(book)
+                call.respond(HttpStatusCode.Created, book)
             }
 
             get("/my") {

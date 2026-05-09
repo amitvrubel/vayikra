@@ -11,7 +11,14 @@ fun Application.configureDatabase() {
     val user = environment.config.property("db.user").getString()
     val password = environment.config.property("db.password").getString()
 
-    Database.connect(url = url, driver = "org.postgresql.Driver", user = user, password = password)
+    val driver =
+        if (url.startsWith("jdbc:h2")) {
+            "org.h2.Driver"
+        } else {
+            "org.postgresql.Driver"
+        }
+
+    Database.connect(url = url, driver = driver, user = user, password = password)
     transaction {
         SchemaUtils.create(Users, Books, BookJourney)
     }

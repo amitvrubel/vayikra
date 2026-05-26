@@ -1,5 +1,7 @@
 package com.vayikra.services
 
+import com.vayikra.com.vayikra.models.BookJourneyEntry
+import com.vayikra.db.BookJourney
 import com.vayikra.db.BookRequests
 import com.vayikra.db.Books
 import com.vayikra.models.BookRequest
@@ -13,7 +15,9 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
 
-class BookRequestService {
+class BookRequestService(
+    private val userService: UserService = UserService(),
+) {
     fun createRequest(
         bookId: String,
         requesterId: String,
@@ -97,6 +101,33 @@ class BookRequestService {
 
             Books.update({ Books.id eq request.bookId }) {
                 it[Books.status] = bookStatus
+            }
+
+            if (newStatus == BookRequestStatus.DELIVERED) {
+                val fromUser = userService.findById(request.ownerId)
+                val toUser = userService.findById(request.requesterId)
+
+                if (fromUser != null && toUser != null) {
+                    val entry =
+                        BookJourneyEntry(
+                            bookId = request.bookId,
+                            fromUserId = request.ownerId,
+                            toUserId = request.requesterId,
+                            fromCity = fromUser.city,
+                            toCity = toUser.city,
+                            transferredAt = now,
+                        )
+
+                    BookJourney.insert {
+                        it[BookJourney.id] = entry.id
+                        it[BookJourney.bookId] = entry.bookId
+                        it[BookJourney.fromUserId] = entry.fromUserId
+                        it[BookJourney.toUserId] = entry.toUserId
+                        it[BookJourney.fromCity] = entry.fromCity
+                        it[BookJourney.toCity] = entry.toCity
+                        it[BookJourney.transferredAt] = entry.transferredAt
+                    }
+                }
             }
 
             request.copy(status = newStatus, updatedAt = now)

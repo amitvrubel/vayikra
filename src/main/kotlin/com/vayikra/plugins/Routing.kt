@@ -1,5 +1,7 @@
 package com.vayikra.plugins
 
+import com.vayikra.com.vayikra.routes.bookJourneyRoutes
+import com.vayikra.com.vayikra.services.BookJourneyService
 import com.vayikra.com.vayikra.services.JwtService
 import com.vayikra.routes.authRoutes
 import com.vayikra.routes.bookRequestRoutes
@@ -16,6 +18,7 @@ fun Application.configureRouting() {
     val userService = UserService()
     val bookService = BookService()
     val bookRequestService = BookRequestService()
+    val bookJourneyService = BookJourneyService()
     val jwtService =
         JwtService(
             secret = environment.config.property("jwt.secret").getString(),
@@ -29,5 +32,6 @@ fun Application.configureRouting() {
         authRoutes(userService, jwtService)
         bookRoutes(bookService)
         bookRequestRoutes(bookRequestService, bookService)
+        bookJourneyRoutes(bookJourneyService)
     }
 }
